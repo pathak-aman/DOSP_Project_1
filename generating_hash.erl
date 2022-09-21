@@ -5,9 +5,8 @@
 
 
 get_hash(String_to_hash) ->
-  io:format("The string for hashing is: ~p~n", [String_to_hash]),
-  SHA_hash = crypto:hash(sha256,String_to_hash),
-  String_Hash = integer_to_list(binary:decode_unsigned(SHA_hash),16),
+  % io:format("The string for hashing is: ~p~n", [String_to_hash]),
+  String_Hash = [ element(C+1, {$0,$1,$2,$3,$4,$5,$6,$7,$8,$9,$A,$B,$C,$D,$E,$F}) || <<C:4>> <= crypto:hash(sha256,String_to_hash)],
   String_Hash.
 
 
@@ -15,6 +14,5 @@ generate_hash(Input_String) ->
   PREFIX_CONSTANT = get_prefix_constant(),
   % io:format("The prefix is: ~p~n", [PREFIX_CONSTANT]),
   String_to_hash = PREFIX_CONSTANT ++ Input_String,
-
   Hash = get_hash(String_to_hash),
   Hash.
