@@ -67,12 +67,18 @@ loop (Num_Workers, Subproblems, K, Pong_Node) ->
 
 
 start_pong() ->
-    register(pong, spawn(single_worker, pong, [])).
+    register(pong, spawn(multiple_workers, pong, [])).
 
 start_ping(Pong_Node) ->
     {ok, [K]} = io:fread("Enter K:", "~d"),
     {ok, [Num_Workers]} = io:fread("Enter Number of workers:", "~d"),
     {ok, [Subproblems]} = io:fread("Enter Number of sub-problems a single worker handles:", "~d"),
-    loop(Num_Workers, Subproblems, K, Pong_Node),
-    io:format("Check your mined coins on the server!").
+    statistics(runtime),
+    {A,_} = timer:tc(multiple_workers, loop,[Num_Workers, Subproblems, K, Pong_Node]),
+    {_,Time_Since_Last_Call} = statistics(runtime),
+    Time_in_microseconds = Time_Since_Last_Call * 1000,
+    io:format("Check your mined coins on the server!"),
+    io:format("Total time spent : ~p~n", [Time_in_microseconds]),
+    io:format("Total CPU time spent : ~p~n", [A]),
     % spawn(single_worker, ping, [K, Pong_Node]).
+    ok.
