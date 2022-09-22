@@ -2,6 +2,7 @@
 -import(string,[len/1,find/2]).
 -import(generating_hash, [generate_hash/1]).
 -import(constants, [get_prefix_constant/0]).
+-compile(export_all).
 -export([start_ping/1, start_pong/0,  ping/4, pong/0]).
 
 
@@ -73,12 +74,12 @@ start_ping(Pong_Node) ->
     {ok, [K]} = io:fread("Enter K:", "~d"),
     {ok, [Num_Workers]} = io:fread("Enter Number of workers:", "~d"),
     {ok, [Subproblems]} = io:fread("Enter Number of sub-problems a single worker handles:", "~d"),
-    statistics(runtime),
+    Start = erlang:system_time(microsecond),
     {A,_} = timer:tc(multiple_workers, loop,[Num_Workers, Subproblems, K, Pong_Node]),
-    {_,Time_Since_Last_Call} = statistics(runtime),
+    End = erlang:system_time(microsecond),
     Time_in_microseconds = Time_Since_Last_Call * 1000,
-    io:format("Check your mined coins on the server!"),
-    io:format("Total time spent : ~p~n", [Time_in_microseconds]),
-    io:format("Total CPU time spent : ~p~n", [A]),
+    io:format("Check your mined coins on the server!~n"),
+    io:format("Total Real time spent : ~p~n", [Time_in_microseconds]),
+    io:format("Total CPU time spent : ~p~n", [End - Start]),
     % spawn(single_worker, ping, [K, Pong_Node]).
     ok.
