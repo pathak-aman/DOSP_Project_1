@@ -3,7 +3,7 @@
 -import(generating_hash, [generate_hash/1]).
 -import(constants, [get_prefix_constant/0]).
 -export([start_ping/1, start_pong/0,  ping/5, pong/2]).
-
+-compile(export_all).
 
 is_leading_zero_K(Hashed_string, K) when K > 0 ->
     % io:format("hashed string is: ~p~n", [Hashed_string]),
@@ -69,7 +69,14 @@ pong(Coin_Counter, Worker_Counter) ->
                 true ->
                     Mined = counters:get(Coin_Counter,1),
                     Tot_String = Workers*Prob,
-                    io:format("~n-------------------------------------------------------~nFinal Stats~n-------------------------------------------------------~nTotal Bitcoin Mined: ~p~nTotal Workers: ~p~nTotal String Checked: ~p~nSuccess Rate: ~p~n~n~n", [Mined, Workers,Tot_String, Mined/Tot_String]);
+                    {_,Time_Since_Last_Call} = statistics(runtime),
+                    
+                    {_,Real_Time_Since_Last_Call}  = statistics(wall_clock),
+                    Time_in_microseconds = Time_Since_Last_Call * 1000,
+
+                    io:format("~n-------------------------------------------------------~nFinal Stats~n-------------------------------------------------------~nTotal Bitcoin Mined: ~p~nTotal Workers: ~p~nTotal String Checked: ~p~nSuccess Rate: ~p~n~n~n", [Mined, Workers,Tot_String, Mined/Tot_String]),
+                    io:format("Total CPU time spent : ~p~n", [Time_in_microseconds]),
+                    io:format("Total Real time spent : ~p~n", [Real_Time_Since_Last_Call*1000]);
                 false ->
                     pong(Coin_Counter, Worker_Counter)
             end
@@ -87,11 +94,18 @@ loop (Num_Workers, Subproblems, K, Pong_Node, Workers) ->
 start_pong() ->
     Coin_Counter = counters:new(1, [write_concurrency]),
     Worker_Counter = counters:new(1, [write_concurrency]),
+    statistics(runtime),
+    statistics(wall_clock),
     register(pong, spawn(multiple_workers_with_stats, pong, [Coin_Counter, Worker_Counter])).
 
 start_ping(Pong_Node) ->
     {ok, [K]} = io:fread("Enter K:", "~d"),
     {ok, [Num_Workers]} = io:fread("Enter Number of workers:", "~d"),
     {ok, [Subproblems]} = io:fread("Enter Number of sub-problems a single worker handles:", "~d"),
-    loop(Num_Workers, Subproblems, K, Pong_Node,Num_Workers),
+    {A,_} = timer:tc(?MODULE, loop,[Num_Workers, Subproblems, K, Pong_Node,Num_Workers]),
+    %{_,Time_Since_Last_Call} = statistics(runtime),
+    %{_,Real_Time_Since_Last_Call}  = statistics(wall_clock),
+    %Time_in_microseconds = Time_Since_Last_Call * 1000,
+    %io:format("Total Real time spent : ~p~p~n", [A*1000,Real_Time_Since_Last_Call]),
+    %io:format("Total CPU time spent : ~p~n", [Time_in_microseconds]),
     io:format("Check your mined coins on the server!~n").
