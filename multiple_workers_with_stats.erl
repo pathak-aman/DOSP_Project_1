@@ -94,8 +94,6 @@ loop (Num_Workers, Subproblems, K, Pong_Node, Workers) ->
 start_pong() ->
     Coin_Counter = counters:new(1, [write_concurrency]),
     Worker_Counter = counters:new(1, [write_concurrency]),
-    statistics(runtime),
-    statistics(wall_clock),
     register(pong, spawn(multiple_workers_with_stats, pong, [Coin_Counter, Worker_Counter])).
 
 start_ping(Pong_Node) ->
@@ -103,6 +101,8 @@ start_ping(Pong_Node) ->
     {ok, [Num_Workers]} = io:fread("Enter Number of workers:", "~d"),
     {ok, [Subproblems]} = io:fread("Enter Number of sub-problems a single worker handles:", "~d"),
     {A,_} = timer:tc(?MODULE, loop,[Num_Workers, Subproblems, K, Pong_Node,Num_Workers]),
+    statistics(runtime),
+    statistics(wall_clock),
     %{_,Time_Since_Last_Call} = statistics(runtime),
     %{_,Real_Time_Since_Last_Call}  = statistics(wall_clock),
     %Time_in_microseconds = Time_Since_Last_Call * 1000,
