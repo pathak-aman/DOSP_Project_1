@@ -93,14 +93,14 @@ pong(Coin_Counter, Worker_Counter, K, Num_Workers, Subproblems) ->
                 true ->
                     Mined = counters:get(Coin_Counter,1),
                     Tot_String = Workers*Prob,
-                    {_,Time_Since_Last_Call} = statistics(runtime),
+                    %{_,Time_Since_Last_Call} = statistics(runtime),
                     
-                    {_,Real_Time_Since_Last_Call}  = statistics(wall_clock),
-                    Time_in_microseconds = Time_Since_Last_Call * 1000,
+                    %{_,Real_Time_Since_Last_Call}  = statistics(wall_clock),
+                    %Time_in_microseconds = Time_Since_Last_Call * 1000,
 
-                    io:format("~n-------------------------------------------------------~nFinal Worker Stats~n-------------------------------------------------------~nTotal Bitcoin Mined: ~p~nTotal Workers: ~p~nTotal String Checked: ~p~nSuccess Rate: ~p~n~n~n", [Mined, Workers,Tot_String, Mined/Tot_String]),
-                    io:format("Total CPU time spent : ~p~n", [Time_in_microseconds]),
-                    io:format("Total Real time spent : ~p~n", [Real_Time_Since_Last_Call*1000]);
+                    io:format("~n-------------------------------------------------------~nFinal Worker Stats~n-------------------------------------------------------~nTotal Bitcoin Mined: ~p~nTotal Workers: ~p~nTotal String Checked: ~p~nSuccess Rate: ~p~n~n~n", [Mined, Workers,Tot_String, Mined/Tot_String]);
+                   % io:format("Total CPU time spent : ~p~n", [Time_in_microseconds]),
+                    %io:format("Total Real time spent : ~p~n", [Real_Time_Since_Last_Call*1000]);
                 false ->
                     pong(Coin_Counter, Worker_Counter, K, Num_Workers, Subproblems)
             end
@@ -134,13 +134,8 @@ start_ping(Pong_Node) ->
     {pong, Pong_Node} ! {ping, self()},
     receive 
         {K, Num_Workers, Subproblems} ->
-            {_A,_} = timer:tc(?MODULE, loop,[Num_Workers, Subproblems, K, Pong_Node,Num_Workers]),
-            statistics(runtime),
-            statistics(wall_clock),
-            %{_,Time_Since_Last_Call} = statistics(runtime),
-            %{_,Real_Time_Since_Last_Call}  = statistics(wall_clock),
-            %Time_in_microseconds = Time_Since_Last_Call * 1000,
-            %io:format("Total Real time spent : ~p~p~n", [A*1000,Real_Time_Since_Last_Call]),
-            %io:format("Total CPU time spent : ~p~n", [Time_in_microseconds]),
+            %statistics(runtime),
+            %statistics(wall_clock),
+            loop(Num_Workers, Subproblems, K, Pong_Node,Num_Workers),
             io:format("Check your mined coins on the server!~n")
     end.
